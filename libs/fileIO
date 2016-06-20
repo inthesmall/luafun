@@ -1,0 +1,56 @@
+
+readFile = nil
+-- Allows basic reading from a file
+-- Params:
+--  Filepath
+-- Returns:
+--  Array filled with strings, each element is a line of the document
+--  If file doesn't exist it will return nil with an error message
+
+writeFile = nil
+-- Allows basic writing to a file
+-- Params:
+--  Filepath
+--  Array of strings to print into the file line by line
+--  (Optional) Force overwrite of existing file
+-- Returns:
+--  Error message if file exists and override not set
+
+readFile = function(filepath)
+  if (not fs.exists(filepath)) then
+    print("File: '" .. filepath .. "' does not exist")
+    return nil
+  end
+  
+  local contents = {}
+  local f = fs.open(filepath, "r")
+  local line = ""
+  
+  repeat
+    line = f.readLine()
+    if (line) then
+      table.insert(contents, line)
+    end
+  until (not line)
+  
+  f.close()
+  return contents
+end
+
+writeFile = function(filepath, contents, override)
+  if (fs.exists(filepath)) then
+    if (override) then
+      fs.delete(filepath)
+    else
+      print("File: '" .. filepath .. "' already exists (set override to re-write the file)")
+      return
+    end
+  end
+  
+  local f = fs.open(filepath, "w")
+  for _, str in pairs(contents) do
+    f.writeLine(str)
+  end
+  
+  f.close()
+end

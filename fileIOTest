@@ -1,0 +1,23 @@
+requires = {
+  "core",
+  "fileIO"
+}
+
+main = function()
+  os.loadAPI("libs/i")
+  i.importList(requires)
+  
+  local writing = {
+    "Line 1",
+    "Line 2",
+    "...",
+    "It works?"
+  }
+  
+  fileIO.writeFile("test.txt", writing, true)
+  
+  local contents = fileIO.readFile("test.txt")
+  core.printArray(contents)
+end
+
+main()
