@@ -1,0 +1,75 @@
+--HamezOS sysInfo--
+
+--[[
+sysInfo has only one job:
+1) Print out essential system information to the user
+]]--
+
+--Variables--
+--Function Declarations--
+main = nil
+
+readLineFromFile = nil
+readFile = nil
+
+--Functions--
+main = function()
+  if _G[readFile] then print("MAIN EXISTS") end
+  
+  local myID = os.getComputerID()
+  local myLabel = os.getComputerLabel()
+  
+  --OS Version--
+  print("HamezOS Version: v"..readLineFromFile("local/system/version.txt"))
+  
+  --Device Type--
+  if turtle then print("Device: Turtle")
+  else print("Device: Computer") end
+  
+  --Dev PC--
+  if myLabel == "HamezDev" then print("Dev System: True")
+  else print("Dev System: False") end
+  
+  --Is Host/Mainframe--
+  if readLineFromFile("system/hostID.txt") == myID then print("System Type: Host")
+  else print("System Type: User") end
+  
+  --Has Password--
+  local password = readLineFromFile("local/system/password.txt")
+  if (not password) or password == "[N/A]" then print("Password Protected: False")
+  else print("Password Protected: True") end
+  
+  --Boot program--
+  print("Boot Program: "..readLineFromFile("local/system/boot.txt"))
+  print("")
+  
+  --All Peripherals--
+  print("Peripherals:")
+  for _, side in ipairs(rs.getSides()) do
+    local type = peripheral.getType(side)
+    if type then print(side.."->"..type) end
+  end
+  print("")
+end
+
+readLineFromFile = function(path)
+  local contents = readFile(path)
+  if (not contents) or contents == {} then return "[N/A]" end
+  return contents[1]
+end
+
+readFile = function(path)
+  if not fs.exists(path) then return nil end
+  
+  local contents = {}
+  local f = fs.open(path, "r")
+  local line = ""
+  repeat
+    line = f.readLine()
+    if line then table.insert(contents, line) end
+  until not line
+  f.close()
+  return contents
+end
+
+main()

@@ -1,0 +1,37 @@
+--HamezOS Startup--
+
+--[[
+Startup has two jobs:
+1) Update everything in system to the latest version
+2) Start the kernal
+]]--
+
+--Variables--
+--Function Declarations--
+main = nil
+
+run = nil
+
+--Functions--
+main = function()
+  if (not fs.exists("system/kernal")) then
+    print("Kernal not found")
+    if fs.exists("disk/system/kernal") then
+      print("Obtaining from disk")
+      fs.copy("disk/system/kernal", "system/kernal")
+    else return end
+  end
+  if true then return end
+  run("system/kernal")
+end
+
+run = function(path)
+  if not fs.exists(path) then print("File: '"..path.."' doesn't exist, please re-install HamezOS")
+  else
+    if shell.run(path) then return true
+    else print("File: '"..path.."' exists but is unable to be executed") end
+  end
+  return false
+end
+
+main()

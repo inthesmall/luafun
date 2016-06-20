@@ -1,0 +1,205 @@
+--HamezOS--
+--VARIABLES--
+
+local color = {
+  ["red"] = 0xFF0000,
+  ["green"] = 0x00FF00,
+  ["blue"] = 0x0000FF,
+  ["white"] = 0xFFFFFF,
+  ["black"] = 0x000000
+}
+
+local validCommand = {
+  ["MSG"] = true, --Send a message to glasses
+  ["TC"] = true,  --Specify the text color
+  ["BC"] = true,  --Specify the background color
+  ["BA"] = true   --Specify the background alpha
+}
+
+local sendChannel = 1
+local receiveChannel = 2
+local messageTimeout = 15
+local maxMessagesOnScreen = 10
+
+local version = "[Version not avalible]"
+local out = nil
+local modem = nil
+
+local messages = {}
+local toBeDeleted = {}
+local messageDelay = 0.02 * messageTimeout
+
+--FUNCTIONS--
+main = nil
+
+send = nil
+recieve = nil
+
+printMessages = nil
+deleteOldMessages = nil
+parseMessage = nil
+
+getPeripheral = nil
+getTime = nil
+getVersion = nil
+
+addText = nil
+addBox = nil
+clear = nil
+sync = nil
+
+main = function()
+  out = getPeripheral("openperipheral_bridge")
+  modem = getPeripheral("modem")
+  getVersion()
+  if not (out and modem) then return end
+  print("Found glass and modem")
+  
+  modem.open(receiveChannel)
+  
+  while true do
+    clear()
+    addBox(5, 5, 70, 25, color["white"], 0.2)
+    addText(8, 8, "HamezOS v"..version, color["white"])
+    addText(8, 20, "Time: "..getTime())
+    
+    printMessages()
+    
+    sync()
+    sleep(0.1)
+  end
+  
+  modem.closeAll()
+end
+
+parseMessage = function(str)
+  local toks = {}
+  --0: Constructing Token
+  --1: Building string
+  --2: Building text color
+  --3: Building background color
+  local c = ""
+  local token = ""
+  local mode = 0
+  for i = 1, #str do
+    local c = string.sub(str, i, i)
+    if mode == 0 then
+      if c == ":" then
+        if validCommand[token] then
+          mode = 1
+          table.insert(toks, token)
+        end
+        token = ""
+      else
+        token = token..c
+      end
+    elseif mode == 1 then
+      if c == ";" then
+        table.insert(toks, token)
+        token = ""
+        mode = 0
+      else
+        token = token..c
+      end
+    end
+  end
+  
+  local message = "ERROR: Message not found"
+  local time = getTime()
+  local textColor = color["red"]
+  local backColor = color["black"]
+  local backAlpha = 0.2
+  
+  for i = 1, (#toks - 1) do
+    if toks[i] == "MSG" then message = toks[i + 1] end
+    if toks[i] == "TC" then textColor = tonumber(toks[i + 1]) end
+    if toks[i] == "BC" then backColor = tonumber(toks[i + 1]) end
+    if toks[i] == "BA" then backAlpha = tonumber(toks[i + 1]) end
+  end
+  return {message, time, textColor, backColor, backAlpha}
+end
+
+printMessages = function()
+  if not messages then return end
+  deleteOldMessages()
+  
+  local numMessages = #messages
+  local lowerBound = 0
+  if numMessages >= maxMessagesOnScreen then lowerBound = numMessages - (maxMessagesOnScreen - 1) else lowerBound = 1 end
+  for i = lowerBound, numMessages do
+    addBox(6, 38 + (i - (lowerBound - 1)) * 12, 70 + #(messages[i][5]) * 6, 12, messages[i][8], messages[i][9])
+    addText(8, 40 + (i - (lowerBound - 1)) * 12, i..") "..messages[i][6], messages[i][7])
+    addText(70, 40 + (i - (lowerBound - 1)) * 12, messages[i][5], messages[i][7])
+  end
+end
+
+deleteOldMessages = function()
+  toBeDeleted = {}
+  for i = 1, #messages do
+    if messages[i][1] < os.time() - messageDelay then
+      table.insert(toBeDeleted, i)
+    end
+  end
+  for i = 1, #toBeDeleted do
+    table.remove(messages, toBeDeleted[i])
+  end
+end
+
+receive = function()
+  while true do
+    local e = {os.pullEvent("modem_message")}
+    e[1] = os.time()
+    local m = parseMessage(e[5])
+    for i = 1, #m do
+      e[4 + i] = m[i]
+    end
+    table.insert(messages, e)
+    print("Message: "..e[5])
+  end
+end
+
+send = function(str)
+  print("Sent ("..sendChannel.."): "..str)
+  modem.transmit(sendChannel, receiveChannel, str)
+end
+
+getTime = function()
+  return textutils.formatTime(os.time(), false)
+end
+
+getVersion = function()
+  if not fs.exists("version.txt") then return false end
+  local f = fs.open("version.txt", "r")
+  version = f.readLine()
+  f.close()
+  return true
+end
+
+getPeripheral = function(str)
+  for _, side in ipairs(rs.getSides()) do
+    if peripheral.getType(side) == str then
+      return peripheral.wrap(side)
+    end
+  end
+  print("Couldn't find peripheral: "..str)
+  return nil
+end
+
+addText = function(x, y, str, c)
+  out.addText(x + 1, y + 1, str, color["black"])
+  out.addText(x, y, str, c)
+end
+
+addBox = function(x, y, width, height, c, alpha)
+  out.addBox(x, y, width, height, c, alpha)
+end
+
+clear = function()
+  out.clear()
+end
+
+sync = function()
+  out.sync()
+end
+
+parallel.waitForAll(receive, main)

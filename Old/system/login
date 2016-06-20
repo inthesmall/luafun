@@ -1,0 +1,158 @@
+--HamezOS Login--
+
+--[[
+Login has the following jobs:
+1) Add a way to stop people from getting into computers if the owner wishes
+2) Add a way to remove passwords from the system
+]]--
+
+--Variables--
+local out = term
+
+local version = "[N/A]"
+local password = "[N/A]"
+local defaultPassword = "default"
+
+local versionPath = "local/system/version.txt"
+local passwordPath = "local/system/password.txt"
+
+local pullEvent = os.pullEvent
+local pullEventRaw = os.pullEventRaw
+
+--Function Declarations--
+main = nil
+
+allowTerminate = nil
+
+getPassword = nil
+getVersion = nil
+readFile = nil
+
+text = nil
+centerText = nil
+getCenterX = nil
+getCenterY = nil
+
+isTurtle = nil
+
+--Functions--
+main = function()
+  --allowTerminate(false)
+  
+  getVersion()
+  local welcomeText = "Welcome to HamezOS V"..version
+  if getPassword() then
+    if password == defaultPassword then setNewPassword() end
+    
+    while true do
+      out.clear()
+      centerText(welcomeText, -3)
+      
+      if isTurtle() then centerText("Turtle Edition", -2)
+      else centerText("Computer Edition", -2) end
+      
+      centerText("Please enter password:", 0)
+      out.setCursorPos(getCenterX(password), getCenterY() + 2)
+      local input = read("*")
+      if input == password then break end
+    end
+  end
+  
+  out.clear()
+  out.setCursorPos(getCenterX(welcomeText), 1)
+  out.write(welcomeText)
+  out.setCursorPos(1, 2)
+  allowTerminate(true)
+end
+
+setNewPassword = function()
+  local input = ""
+  while true do
+    out.clear()
+    centerText("Seems like this is the first boot", -2)
+    centerText("Please type your new password: ", -1)
+    centerText("(Blank removes password)", 0)
+    out.setCursorPos(getCenterX("******"), getCenterY() + 2)
+    input = read("*")
+    if not (input == "") then
+      out.clear()
+      centerText("Type password again:", -1)
+      out.setCursorPos(getCenterX(input), getCenterY() + 2)
+      local input2 = read("*")
+      if (input == input2) then break end
+      out.clear()
+      centerText("Your passwords did not match", 0)
+      sleep(3)
+    else break end
+  end
+  if fs.exists("password.txt") then fs.delete("password.txt") end
+  local f = fs.open("local/system/password.txt", "w")
+  f.write(input)
+  f.close()
+  os.reboot()
+end
+
+getPassword = function()
+  local contents = readFile(passwordPath)
+  if (not contents) or contents == {} then return false end
+  password = contents[1]
+  return true
+end
+
+getVersion = function()
+  local contents = readFile(versionPath)
+  if (not contents) or contents == {} then return false end
+  version = contents[1]
+  return true
+end
+
+readFile = function(path)
+  if not fs.exists(path) then
+    print("File: '"..path.."' doesn't exist")
+    return nil
+  end
+  
+  local contents = {}
+  local f = fs.open(path, "r")
+  local line = ""
+  repeat
+    line = f.readLine()
+    if line then table.insert(contents, line) end
+  until not line
+  f.close()
+  return contents
+end
+
+text = function(str, x, y)
+  out.setCursorPos(x, y)
+  out.write(str)
+end
+
+centerText = function(str, yOffset)
+  local x = getCenterX(str)
+  local y = getCenterY()
+  text(str, x, y + yOffset)
+end
+
+getCenterX = function(str)
+  local width, height = out.getSize()
+  if not str then return math.ceil(width / 2)
+  else return math.ceil((width / 2) - (#str / 2)) end
+end
+
+getCenterY = function()
+  local width, height = out.getSize()
+  return height / 2
+end
+
+allowTerminate = function(b)
+  if b then os.pullEvent = pullEvent
+  else os.pullEvent = pullEventRaw end
+end
+
+isTurtle = function()
+  if turtle then return true else return false end
+end
+
+main()
+allowTerminate(true)

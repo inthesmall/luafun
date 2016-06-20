@@ -1,0 +1,89 @@
+--HamezOS parser--
+
+parse = function(validCommands, input)
+  local state = 0
+  local c = ""
+  local token = ""
+  local stack = {}
+  local arrayStack = {}
+  local charImmunity = false
+  local inputLen = #input
+  
+  for i = 1, inputLen + 1 do
+    c = string.sub(input, i, i)
+    if charImmunity == true then 
+      token = token..c
+      charImmunity = false
+    elseif c == "\\" then
+      charImmunity = true
+    elseif state == 0 then
+      if c == "(" then
+        if token ~= "" then
+          table.insert(stack, token)
+          token = ""
+        end
+        state = 1
+      elseif c ~= " " then token = token..c end
+    elseif state == 1 then
+      if c == ")" then
+        if token ~= "" then
+          table.insert(stack, token)
+          table.insert(stack, "EOC")
+          token = ""
+        end
+        state = 0
+      elseif c == "{" then
+        state = 2
+      elseif c == "," then
+        table.insert(stack, token)
+        token = ""
+      else token = token..c end
+    elseif state == 2 then
+      if c == "}" then
+        if token ~= "" then
+          table.insert(arrayStack, token)
+          token = ""
+        end
+        table.insert(stack, arrayStack)
+        arrayStack = {}
+        state = 1
+      elseif c == "," then
+        if token ~= "" then
+          table.insert(arrayStack, token)
+          token = ""
+        end
+      else token = token..c end
+    end
+  end
+  
+  while #stack > 0 do
+    local token = table.remove(stack, 1)
+    local func = validCommands[token]
+    local toInput = table.remove(stack, 1)
+    local forMe = false
+    
+    if string.sub(toInput, 1, 3) == "ID:" then
+      if os.getComputerID() == tonumber(string.sub(toInput, 4, #toInput)) then forMe = true end
+    elseif string.sub(toInput, 1, 6) == "LABEL:" then
+      if myLabel == string.sub(toInput, 7, #toInput) then forMe = true end
+    elseif string.sub(toInput, 1, 3) == "ALL" then forMe = true end
+    local from = table.remove(stack, 1)
+    
+    if forMe then
+      if func then
+        print("RUNNING FUNCTION: '"..token.."'")
+        func(from, stack)
+      else print("INVALID COMMAND: '"..token.."'") end
+    else print("RECIEVED COMMAND NOT FOR ME: "..toInput) end
+    
+    local stop = false
+    repeat
+      if #stack <= 0 then
+        stop = true
+      else
+        token = table.remove(stack, 1)
+        if token == "EOC" then stop = true end
+      end
+    until stop
+  end
+end

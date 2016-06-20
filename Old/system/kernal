@@ -1,0 +1,73 @@
+--HamezOS Kernal--
+
+--[[
+Kernal has the following jobs:
+1) Run the updater to make sure everything outside of system is up to date
+2) Handle logging in/account management
+3) Boot into a desired program for static machines
+]]--
+
+--Variables--
+--Function Declarations--
+main = nil
+bootInto = nil
+setupBootPath = nil
+
+run = nil
+readFile = nil
+
+--Functions--
+main = function()
+  run("system/update")
+  
+  if bootInto() == false then
+    run("system/login")
+    setupBootPath()
+  else
+    run("system/login")
+  end
+end
+
+setupBootPath = function()
+  --Prompt for adding a boot path
+end
+
+bootInto = function()
+  local bootPath = "local/system/boot.txt"
+  if not fs.exists(bootPath) then return false end
+  
+  local contents = readFile(bootPath)
+  if (not contents) or contents == {} then return false end
+  
+  local bootProgram = contents[1]
+  run(bootProgram)
+  return true
+end
+
+readFile = function(path)
+  if not fs.exists(path) then
+    print("File: '"..path.."' doesn't exist")
+    return nil
+  end
+  
+  local contents = {}
+  local f = fs.open(path, "r")
+  local line = ""
+  repeat
+    line = f.readLine()
+    if line then table.insert(contents, line) end
+  until not line
+  f.close()
+  return contents
+end
+
+run = function(path)
+  if not fs.exists(path) then print("File: '"..path.."' doesn't exist, please re-install HamezOS")
+  else
+    if shell.run(path) then return true
+    else print("File: '"..path.."' exists but is unable to be executed") end
+  end
+  return false
+end
+
+main()

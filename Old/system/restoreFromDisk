@@ -1,0 +1,64 @@
+--HamezOS restoreFromDisk--
+
+--[[
+restoreFromDisk has only one job:
+1) Restore the whole system from a disk
+]]--
+
+--Variables--
+
+local showDebug = true
+
+local ignore = {
+  ["rom"] = true,
+  [".temp"] = true,
+  ["disk"] = true,
+  ["local"] = true,
+  ["openp"] = true
+}
+
+local ignoreDisk = {
+}
+
+--Function Declarations--
+main = nil
+debugPrint = nil
+
+--Functions--
+main = function()
+  if os.getComputerLabel() == "HamezDev" then
+    local userInput = ""
+    repeat
+      print("This is a dev pc, restore? (y/n)")
+      userInput = read()
+      if userInput == "n" then return false end
+    until userInput == "y"
+  end
+  
+  if not fs.exists("disk/") then
+    print("Disk not found")
+    return false
+  end
+  
+  print("Starting Restore")
+  for _, filename in ipairs(fs.list("")) do
+    if not ignore[filename] then
+      debugPrint("Deleted: "..filename)
+      fs.delete(filename)
+    end
+  end
+  
+  for _, filename in ipairs(fs.list("disk/")) do
+    if not ignoreDisk[filename] then
+      debugPrint("Copied: disk/"..filename)
+      fs.copy("disk/"..filename, filename)
+    end
+  end
+  print("Restore Complete")
+end
+
+debugPrint = function(str)
+  if showDebug then print(str) end
+end
+
+main()

@@ -1,0 +1,55 @@
+--HamezOS backupToDisk--
+
+--[[
+backupToDisk has only one job:
+1) Backup the whole system onto a disk for later restoring
+]]--
+
+--Variables--
+
+local showDebug = true
+
+local ignore = {
+  ["rom"] = true,
+  [".temp"] = true,
+  ["disk"] = true,
+  ["local"] = true,
+  ["openp"] = true
+}
+
+local ignoreDisk = {
+}
+
+--Function Declarations--
+main = nil
+debugPrint = nil
+
+--Functions--
+main = function()
+  if not fs.exists("disk/") then
+    print("Disk not found")
+    return false
+  end
+  
+  print("Starting Backup")
+  for _, filename in ipairs(fs.list("disk/")) do
+    if not ignoreDisk[filename] then
+      debugPrint("Deleted: disk/"..filename)
+      fs.delete("disk/"..filename)
+    end
+  end
+  
+  for _, filename in ipairs(fs.list("")) do
+    if not ignore[filename] then
+      debugPrint("Copied: "..filename)
+      fs.copy(filename, "disk/"..filename)
+    end
+  end
+  print("Backup Complete")
+end
+
+debugPrint = function(str)
+  if showDebug then print(str) end
+end
+
+main()
