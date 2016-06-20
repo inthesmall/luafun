@@ -1,0 +1,52 @@
+
+-- This is a small file just showing how to use
+-- the 'draw' import with a monitor and the
+-- glasses terminal
+
+-- As a side note, the (x, y) coordinate system
+-- is slightly different between the two. Monitors
+-- and terminals use each character / line as its
+-- unit measurement wheras the glasses terminal seems
+-- to work in pixel measurements
+
+requires = {
+  "core",
+  "draw"
+}
+
+main = function()
+  os.loadAPI("libs/i")
+  i.importList(requires)
+  
+  -- Term is just a keyword for the computer screen
+  terminal = term
+  glasses = core.getPeripheral("openperipheral_bridge")
+  monitor = core.getPeripheral("monitor")
+  
+  if (glasses) then
+    draw.setScreen(glasses)
+    draw.clear()
+    draw.text(10, 10, "This should be on your HUD")
+  end
+  
+  if (monitor) then
+    draw.setScreen(monitor)
+    local cy = draw.getCenterY()
+    
+    draw.clear()
+    draw.centerText(cy, "and this should be")
+    draw.centerText(cy + 1, "centered on the monitor")
+  end
+  
+  if (terminal) then
+    draw.setScreen(terminal)
+    local cy = draw.getCenterY()
+    
+    draw.clear()
+    draw.centerText(cy, "and this should be")
+    draw.centerText(cy + 1, "centered on the terminal")
+    draw.setCursorPos(1, 1)
+  end
+end
+
+main()

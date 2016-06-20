@@ -1,0 +1,22 @@
+
+importList = nil
+-- Imports all files in an array
+-- Params:
+--   importPaths - Array of files to import (string)
+-- Returns:
+--   Prints messages for all import errors
+
+
+importList = function(importPaths)
+  if (not importPaths) then
+    return
+  end
+  
+  for _,filepath in pairs(importPaths) do
+    if (not fs.exists("libs/" .. filepath)) then
+      print("File: 'libs/" .. filepath .. "' doesn't exist")
+    elseif (not os.loadAPI("libs/" .. filepath)) then
+      print("API: 'libs/" .. filepath .. "' could not be loaded")
+    end
+  end
+end

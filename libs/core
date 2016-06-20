@@ -1,0 +1,18 @@
+
+getPeripheral = nil
+-- Returns a wrapped peripheral of the name given
+-- Params:
+--  Name of peripheral to wrap
+-- Returns:
+--  Wrapped peripheral if found
+--  otherwise nil (Error message printed)
+
+getPeripheral = function(str)
+  for _, side in ipairs(rs.getSides()) do
+    if peripheral.getType(side) == str then
+      return peripheral.wrap(side)
+    end
+  end
+  print("Couldn't find peripheral: "..str)
+  return nil
+end

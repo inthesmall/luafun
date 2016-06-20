@@ -1,0 +1,105 @@
+
+-- Turns out that there is no way to get the width
+-- of the screen for openperipherals objects so no
+-- alignment functions work if your using one.
+
+
+setScreen = nil
+-- Sets the drawing device
+-- Params:
+--  Peripheral to draw to
+
+clear = nil
+-- Clears the screen
+
+setCursorPos = nil
+-- Sets the position of the cursor (doesn't work on glasses)
+-- Params:
+--  xPos of cursor
+--  yPos of cursor
+
+text = nil
+-- Draws text to the screen
+-- Params:
+--  xPos of text
+--  yPos of text
+--  Text to draw
+
+centerText = nil
+-- Draws text centered on the screen
+-- Params:
+--  yPos of text
+--  Text to draw
+
+getCenterX = nil
+-- Gets the x pos of the center of the current screen
+-- Returns:
+--  x pos of center of screen (int)
+
+getCenterY = nil
+-- Gets the y pos of the center of the current screen
+-- Returns:
+--  y pos of center of screen (int)
+
+
+
+
+screen = nil
+width = 0
+height = 0
+
+-- This is so I can use the right function calls
+-- depending on what device is being used
+usingOpen = false
+
+main = function()
+  os.loadAPI("libs/i")
+  i.importList(imports)
+end
+
+setScreen = function(periph)
+  screen = periph
+  
+  -- Check to see if the function getSize exists in the peripheral
+  usingOpen = not screen.getSize
+  
+  if (not usingOpen) then
+    width, height = screen.getSize()
+  end
+end
+
+clear = function()
+  screen.clear()
+end
+
+setCursorPos = function(x, y)
+  if (not usingOpen) then
+    screen.setCursorPos(x, y)
+  end
+end
+
+text = function(x, y, str)
+  if (usingOpen) then
+    screen.addText(x, y, str)
+    screen.sync()
+  else
+    screen.setCursorPos(x, y)
+    screen.write(str)
+  end
+end
+
+centerText = function(y, str)
+  text(getCenterX(str), y, str)
+end
+
+getCenterX = function(str)
+  if (usingOpen) then return 0 end
+  if not str then return math.ceil(width / 2)
+  else return math.ceil((width / 2) - (#str / 2)) end
+end
+
+getCenterY = function()
+  return height / 2
+end
+
+main()
