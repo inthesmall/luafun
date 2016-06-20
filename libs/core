@@ -7,12 +7,23 @@ getPeripheral = nil
 --  Wrapped peripheral if found
 --  otherwise nil (Error message printed)
 
+printArray = nil
+-- Prints an array to the terminal window
+-- Params:
+--  One dimentional array of printable entities to print
+
 getPeripheral = function(str)
-  for _, side in ipairs(rs.getSides()) do
+  for _, side in pairs(rs.getSides()) do
     if peripheral.getType(side) == str then
       return peripheral.wrap(side)
     end
   end
   print("Couldn't find peripheral: "..str)
   return nil
+end
+
+printArray = function(array)
+  for _, str in pairs(array) do
+    print(str)
+  end
 end

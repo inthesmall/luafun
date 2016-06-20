@@ -8,14 +8,14 @@ importList = nil
 
 
 importList = function(importPaths)
-  if (not importPaths) then
+  if ((not importPaths) or (#importPaths == 0)) then
     return
   end
   
   for _,filepath in pairs(importPaths) do
-    if (not fs.exists("libs/" .. filepath)) then
+    if (not fs.exists("/libs/" .. filepath)) then
       print("File: 'libs/" .. filepath .. "' doesn't exist")
-    elseif (not os.loadAPI("libs/" .. filepath)) then
+    elseif (not os.loadAPI("/libs/" .. filepath)) then
       print("API: 'libs/" .. filepath .. "' could not be loaded")
     end
   end

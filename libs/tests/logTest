@@ -1,0 +1,39 @@
+
+requires = {
+  "logs"
+}
+
+main = function()
+  os.loadAPI("/libs/i")
+  i.importList(requires)
+  
+  -- Not having a verbose param sets it to
+  -- always print to log
+  logs.add("Hello,")
+  logs.add("World!")
+  
+  logs.clear()
+  
+  logs.setVerbose(1)
+  
+  logs.add("Goodbye", 1)
+  logs.add("TOP SECRET SSSHHH", 0)
+  logs.add("Universe", 1)
+  
+  logs.setVerbose(0)
+  
+  logs.add("Oh...", 1)
+  logs.add("TOP SECRET SSSHHH", 0)
+  logs.add("Hello Again", 1)
+  
+  logs.printLog()
+  print("")
+  
+  -- You can set to only print out the 2 most recent
+  -- lines if you want
+  logs.printLog(2)
+  
+  logs.printLogToFile("/libs/tests/logOut.txt")
+end
+
+main()

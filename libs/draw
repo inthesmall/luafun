@@ -1,7 +1,7 @@
 
 -- Turns out that there is no way to get the width
 -- of the screen for openperipherals objects so no
--- alignment functions work if your drawing to one
+-- alignment functions work if your using one.
 
 
 setScreen = nil

@@ -1,0 +1,93 @@
+
+requires = {
+  "core",
+  "fileIO"
+}
+
+setVerbose = nil
+-- Sets the level of verbose-ness
+-- Params:
+--  Positive int specifying the amount of logs to track (0 means see all)
+
+clear = nil
+-- Clears the log of all entries
+
+add = nil
+-- Adds an entry to the logging system
+-- Params:
+--  Text to add to the logging
+--  (Optional) Verbose level
+
+printLog = nil
+-- Prints the contents of the logging
+-- Params:
+--  Lines to print
+
+printLogToFile = nil
+-- Prints the log to a file (Overwrites)
+-- Params:
+--  Filepath
+
+-- I am not too sure what the standards for verbose levels are
+-- so im just gunna say 0 means print everything and above that
+-- is reduced visibillity
+verboseLevel = 0
+log = {}
+
+main = function()
+  os.loadAPI("libs/i")
+  i.importList(requires)
+end
+
+setVerbose = function(verbose)
+  if (verbose > 0) then
+    verboseLevel = verbose
+  else
+    verboseLevel = 0
+  end
+end
+
+clear = function()
+  log = {}
+end
+
+add = function(message, verbose)
+  if ((not verbose) or (verbose >= verboseLevel)) then
+    local time = textutils.formatTime(os.time(), false)
+    table.insert(log, time .. ": " .. message)
+  end
+end
+
+printLog = function(lines)
+  local start = 0
+  local length = #log
+  
+  if ((not lines) or (lines > length)) then
+    start = 1
+  else
+    start = length - lines + 1
+  end
+  
+  for i = start, length do
+    print(log[i])
+  end
+end
+
+printLogToFile = function(filepath)
+  fileIO.writeFile(filepath, log, true)
+end
+
+main()
+
+
+
+
+
+
+
+
+
+
+
+
+

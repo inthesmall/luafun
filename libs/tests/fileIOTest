@@ -1,0 +1,26 @@
+requires = {
+  "core",
+  "fileIO"
+}
+
+main = function()
+  os.loadAPI("libs/i")
+  i.importList(requires)
+  
+  local writing = {
+    "Line 1",
+    "Line 2",
+    "...",
+    "It works?"
+  }
+  
+  -- I kinda need to remember to put the '/' infront of these paths
+  -- so its treated as an absolute path... Thats half an hour of
+  -- debugging time wasted lol
+  fileIO.writeFile("/libs/tests/test.txt", writing, true)
+  
+  local contents = fileIO.readFile("/libs/tests/test.txt")
+  core.printArray(contents)
+end
+
+main()
