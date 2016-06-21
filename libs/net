@@ -1,7 +1,8 @@
 
 requires={
   "core",
-  "fileIO"
+  "fileIO",
+  "logs"
 }
 listen=nil
 --Main thread for incoming network connections
@@ -10,12 +11,19 @@ listen=nil
 --Returns:
 --
 
-parse=nil
+worker=nil
 --Deals with recieved messages
 --params:
 --received. This is the packet recieved by listen
 --Returns:
 --
+
+send=nil
+--Send packets to remote machines
+--params:
+--to: recipient ID
+--protocol: message, command, log or logArray
+--data: Message to send
 
 
 listen=function()
@@ -27,28 +35,45 @@ listen=function()
   while true do
     --event, modemSide, senderChannel, replyChannel, message, senderDistance  
     received = {os.pullEvent("modem_message")}
-    parse(received)
+    table.insert(worklist,received)
   end
 end
 
-parse = function(received)
-  for _,item in pairs(received) do
-    print(item)
-  end
-  while true do
-    print("Press E to exit")
-    event,key=os.pullEvent("key")
+worker=function()
+  id=os.getComputerID()
+  while true
+    job=worklist[1]
+    table.remove(worklist,1)  
+    mesg=job[5]
+    if mesg[1]==id then
+      if mesg[3]=="message" then
 
-    if key==keys.e then
-      break
+      elseif mesg[3]=="command" then
+
+      elseif mesg[3]=="log" then
+        logMesg=mesg[4]
+        log.add(logMesg[1],logMesg[2])
+      elseif mesg[3]=="logArray" then
+        logArr=mesg[4]
+        log.addArray(logArr[1],logArr[2],logArr[3])
+      end
     end
-  end
+  
 end
   
+send=function(to, protocol,data)
+  if not modem.isOpen(1) then
+    modem.open(1)
+  end
+  id=os.getComputerID()
+  modem.transmit(1,1,{to,id,protocol,data})
+  
+end
+
 main=function()
+  worklist={}
   os.loadAPI("libs/i")
   i.importList(requires)
-  listen()
 end
 
 
