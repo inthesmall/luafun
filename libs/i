@@ -6,17 +6,39 @@ importList = nil
 -- Returns:
 --   Prints messages for all import errors
 
+if (not _G.loadedAPIs) then
+  _G.loadedAPIs = {}
+end
 
 importList = function(importPaths)
   if ((not importPaths) or (#importPaths == 0)) then
     return
   end
   
-  for _,filepath in pairs(importPaths) do
+  for _, filepath in pairs(importPaths) do
+    
+    --print("Loading: " .. filepath)
+    --printLoadedAPIs()
+    
     if (not fs.exists("/libs/" .. filepath)) then
       print("File: 'libs/" .. filepath .. "' doesn't exist")
-    elseif (not os.loadAPI("/libs/" .. filepath)) then
-      print("API: 'libs/" .. filepath .. "' could not be loaded")
+    elseif (_G.loadedAPIs[filepath]) then
+      print("API: 'libs/" .. filepath .. "' already loaded")
+    else
+      _G.loadedAPIs[filepath] = true
+      --printLoadedAPIs()
+      if (not os.loadAPI("/libs/" .. filepath)) then
+        print("API: 'libs/" .. filepath .. "' could not be loaded")
+        _G.loadedAPIs[filepath] = false
+      end
     end
+    --sleep(5)
+  end
+end
+
+printLoadedAPIs = function()
+  print("Loaded APIs:")
+  for name, value in pairs(_G.loadedAPIs) do
+    print("  " .. name .. " = " .. tostring(value))
   end
 end

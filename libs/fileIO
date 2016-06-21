@@ -1,4 +1,8 @@
 
+requires = {
+  "logs"
+}
+
 readFile = nil
 -- Allows basic reading from a file
 -- Params:
@@ -16,9 +20,14 @@ writeFile = nil
 -- Returns:
 --  Error message if file exists and override not set
 
+main = function()
+  os.loadAPI("libs/i")
+  i.importList(requires)
+end
+
 readFile = function(filepath)
   if (not fs.exists(filepath)) then
-    print("File: '" .. filepath .. "' does not exist")
+    logs.add("File: '" .. filepath .. "' does not exist")
     return nil
   end
   
@@ -42,7 +51,7 @@ writeFile = function(filepath, contents, override)
     if (override) then
       fs.delete(filepath)
     else
-      print("File: '" .. filepath .. "' already exists (set override to re-write the file)")
+      logs.add("File: '" .. filepath .. "' already exists (set override to re-write the file)")
       return
     end
   end
@@ -54,3 +63,5 @@ writeFile = function(filepath, contents, override)
   
   f.close()
 end
+
+main()
