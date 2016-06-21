@@ -1,0 +1,38 @@
+requires = {
+  "fileIO"
+}
+
+template = {
+  "",
+  "requires = {",
+  "  ",
+  "}",
+  "",
+  "main = function()",
+  "  os.loadAPI(\"/libs/i\")",
+  "  i.importList(requires)",
+  "end",
+  "",
+  "main()"
+}
+
+args = {...}
+
+main = function()
+  os.loadAPI("/libs/i")
+  i.importList(requires)
+  
+  local filepath = args[1]
+  local parent = fs.getDir(filepath) .. "/"
+  if (not filepath) then
+    print("No filepath given")
+    return
+  elseif (not fs.isDir(parent)) then
+    print("Filepath: '" .. parent .. "' doesn't exit")
+    return
+  end
+  
+  fileIO.writeFile(filepath, template)
+end
+
+main()
