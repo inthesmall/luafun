@@ -89,7 +89,7 @@ printLog = function(lines)
   end
   
   for i = start, length do
-    print(log[i])
+    print(tostring(log[i]))
   end
 end
 

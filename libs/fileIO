@@ -57,8 +57,13 @@ writeFile = function(filepath, contents, override)
   end
   
   local f = fs.open(filepath, "w")
-  for _, str in pairs(contents) do
-    f.writeLine(str)
+  
+  if (type(contents) == "table") then
+    for _, str in pairs(contents) do
+      f.writeLine(tostring(str))
+    end
+  else
+    f.writeLine(tostring(contents))
   end
   
   f.close()
