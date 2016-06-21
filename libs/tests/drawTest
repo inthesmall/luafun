@@ -20,32 +20,38 @@ main = function()
   
   -- Term is just a keyword for the computer screen
   terminal = term
-  glasses = core.getPeripheral("openperipheral_bridge")
   monitor = core.getPeripheral("monitor")
+  glasses = core.getPeripheral("openperipheral_bridge")
   
-  if (glasses) then
-    draw.setScreen(glasses)
+  if (terminal) then
+    draw.setScreen(terminal)
+    local cx, cy = draw.getCenter()
+    
     draw.clear()
-    draw.text(10, 10, "This should be on your HUD")
+    draw.centeredText(0, 0, "This should be", colors.white)
+    draw.centeredText(0, 1, "centered on the terminal", colors.white)
+    draw.setCursorPos(1, 1)
+  else
+    print("No terminal found")
   end
   
   if (monitor) then
     draw.setScreen(monitor)
-    local cy = draw.getCenterY()
-    
+    local cx, cy = draw.getCenter()
     draw.clear()
-    draw.centerText(cy, "and this should be")
-    draw.centerText(cy + 1, "centered on the monitor")
+    draw.centeredText(0, 0, "This should be", colors.white)
+    draw.centeredText(0, 1, "centered on the monitor", colors.white)
+  else
+    print("No monitor found")
   end
   
-  if (terminal) then
-    draw.setScreen(terminal)
-    local cy = draw.getCenterY()
-    
+  if (glasses) then
+    draw.setScreen(glasses)
     draw.clear()
-    draw.centerText(cy, "and this should be")
-    draw.centerText(cy + 1, "centered on the terminal")
-    draw.setCursorPos(1, 1)
+    draw.blockText(480, 10, "This should be on your HUD", 0xFFFF00, "center", 0xFFFFFF, 0.2)
+    draw.update()
+  else
+    print("No glasses bridge found")
   end
 end
 

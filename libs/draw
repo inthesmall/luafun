@@ -1,8 +1,11 @@
 
--- Turns out that there is no way to get the width
--- of the screen for openperipherals objects so no
--- alignment functions work if your using one.
+requires = {
+  "logs"
+}
 
+-----------------------
+-- GENERAL FUNCTIONS --
+-----------------------
 
 setScreen = nil
 -- Sets the drawing device
@@ -12,59 +15,118 @@ setScreen = nil
 clear = nil
 -- Clears the screen
 
+text = nil
+-- Draws text to the screen
+-- Params:
+--  xPos
+--  yPos
+--  Text to draw
+--  Text color
+--  Text alignment
+
+getTextSize = nil
+-- Estimates the width and height of given text
+-- Params:
+--  Text to measure
+-- Returns:
+--  Width of text
+--  Height of text
+
+
+testOpen = nil
+-- Tests if using right screen mode for respective function
+-- Params:
+--  Value of screen mode expected
+-- Returns:
+--  True if right screen mode
+--  False and error message if not
+
+-----------------------
+--- OPEN PERIPH ONLY --
+-----------------------
+
+update = nil
+-- If using open peripherals updates the screen
+
+box = nil
+-- Draws a box to the screen
+-- Params:
+--  xPos of the top left corner
+--  yPos of the top left corner
+--  Width of the box
+--  Height of the box
+--  Colour of the box
+--  Opacity of the box
+
+blockText = nil
+-- Framed text
+-- Params:
+--  xPos
+--  yPos
+--  Text string
+--  Text color
+--  Text alignment
+--  Box colour
+--  Box alpha
+
+-----------------------
+---- TERMINAL ONLY ----
+-----------------------
+
+centeredText = nil
+-- Draws text centered on the screen
+-- Params:
+--  x translation from center
+--  y translation from center
+--  Text to draw
+
+getCenter = nil
+-- Gets the center position of the current screen
+-- Params:
+--  (Optional) String to offset center x by
+-- Returns:
+--  x pos of center of the screen
+--  y pos of the center of the screen
+
 setCursorPos = nil
 -- Sets the position of the cursor (doesn't work on glasses)
 -- Params:
 --  xPos of cursor
 --  yPos of cursor
 
-text = nil
--- Draws text to the screen
--- Params:
---  xPos of text
---  yPos of text
---  Text to draw
+-----------------------
 
-centerText = nil
--- Draws text centered on the screen
--- Params:
---  yPos of text
---  Text to draw
-
-getCenterX = nil
--- Gets the x pos of the center of the current screen
--- Returns:
---  x pos of center of screen (int)
-
-getCenterY = nil
--- Gets the y pos of the center of the current screen
--- Returns:
---  y pos of center of screen (int)
-
-
-
+-- Rough estimate on the sizes of
+-- a char in open peripherals
+CHAR_WIDTH = 5.3
+CHAR_HEIGHT = 8
 
 screen = nil
-width = 0
-height = 0
+screenWidth = 0
+screenHeight = 0
 
 -- This is so I can use the right function calls
 -- depending on what device is being used
 usingOpen = false
 
+args = {...}
+
 main = function()
   os.loadAPI("libs/i")
-  i.importList(imports)
+  i.importList(requires)
+  
+  logs.add("Running libs/draw", 5)
+  logs.addArray(args, "Arguments", 6)
 end
 
 setScreen = function(periph)
   screen = periph
   
-  -- Check to see if the function getSize exists in the peripheral
+  -- Check to see if getSize() exists in the peripheral
   usingOpen = not screen.getSize
   
   if (not usingOpen) then
-    width, height = screen.getSize()
+    screenWidth, screenHeight = screen.getSize()
   end
 end
 
@@ -72,34 +134,89 @@ clear = function()
   screen.clear()
 end
 
-setCursorPos = function(x, y)
-  if (not usingOpen) then
-    screen.setCursorPos(x, y)
+text = function(x, y, str, color, align)
+  local width, height = getTextSize(str)
+  
+  if (align == "center") then
+    x = x - math.floor(width / 2)
+  elseif (align == "right") then
+    x = x - width
   end
-end
-
-text = function(x, y, str)
+  
   if (usingOpen) then
-    screen.addText(x, y, str)
-    screen.sync()
+    screen.addText(x, y, str, color)
   else
     screen.setCursorPos(x, y)
+    screen.setTextColor(color)
     screen.write(str)
   end
 end
 
-centerText = function(y, str)
-  text(getCenterX(str), y, str)
+getTextSize = function(str)
+  if (usingOpen) then
+    return #str * CHAR_WIDTH, CHAR_HEIGHT
+  else
+    return #str, 1
+  end
 end
 
-getCenterX = function(str)
-  if (usingOpen) then return 0 end
-  if not str then return math.ceil(width / 2)
-  else return math.ceil((width / 2) - (#str / 2)) end
+testOpen = function(value, name)
+  if (usingOpen == value) then
+    return true
+  end
+  logs.add("Tried to draw '" .. name .. "()' in wrong screen mode")
+  return false
 end
 
-getCenterY = function()
-  return height / 2
+update = function()
+  if (testOpen(true, "update")) then
+    screen.sync()
+  end
+end
+
+box = function(xPos, yPos, width, height, colour, alpha)
+  if (testOpen(true, "box")) then
+    screen.addBox(xPos, yPos, width, height, colour, alpha)
+  end
+end
+
+blockText = function(xPos, yPos, str, strColor, strAlign, boxColor, boxAlpha)
+  if (testOpen(true, "blockText")) then
+    local width, height = getTextSize(str)
+    local boxX = xPos
+    if (strAlign == "center") then
+      boxX = xPos - width / 2
+    elseif (strAlign == "right") then
+      boxX = xPos - width
+    end
+    box(boxX, yPos, width + 4, height + 4, boxColor, boxAlpha)
+    text(xPos + 2, yPos + 2, str, strColor, strAlign)
+  end
+end
+
+setCursorPos = function(x, y)
+  if (testOpen(false, "setCursorPos")) then
+    screen.setCursorPos(x, y)
+  end
+end
+
+
+-- Test to see if possible remove local call
+centeredText = function(xTrans, yTrans, str, color)
+  if (testOpen(false, "centeredText")) then
+    local cx, cy = getCenter()
+    text(cx + xTrans, cy + yTrans, str, color, "center")
+  end
+end
+
+getCenter = function()
+  if (testOpen(false, "getCenter")) then
+    return math.ceil(screenWidth / 2), math.floor(screenHeight / 2)
+  else
+    return 0, 0
+  end
 end
 
 main()
+
+

@@ -6,10 +6,9 @@ requires = {
 main = function()
   os.loadAPI("/libs/i")
   i.importList(requires)
-  log1 = logs
-  log1.add("File 1")
+  logs.add("File 1")
   fileIO.readFile("/libs/123")
-  log1.printLog()
+  logs.printLog()
 end
 
 main()
