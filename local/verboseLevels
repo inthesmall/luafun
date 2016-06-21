@@ -1,0 +1,6 @@
+
+General Overview to Verbosity:
+
+0 - everything
+5 - programs as they run
+6 - arguments to programs as they run

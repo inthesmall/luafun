@@ -18,6 +18,13 @@ add = nil
 --  Text to add to the logging
 --  (Optional) Verbose level
 
+addArray = nil
+-- Adds an array to the logging system
+-- Params:
+--  The array to add (string)
+--  The name of the array
+--  (Optional) Verbose level
+
 printLog = nil
 -- Prints the contents of the logging
 -- Params:
@@ -52,9 +59,22 @@ clear = function()
 end
 
 add = function(message, verbose)
-  if ((not verbose) or (verbose >= verboseLevel)) then
+  if ((not verbose) or (verbose <= verboseLevel)) then
     local time = textutils.formatTime(os.time(), false)
     table.insert(log, time .. ": " .. message)
+  end
+end
+
+addArray = function(array, name, verbose)
+  if ((not array) or (#array == 0)) then
+    add(name .. ": (nil/empty)", verbose)
+  else
+    add(name .. ":", verbose)
+  end
+  
+  length = #array
+  for i = 1, length do
+    add(i .. ") " .. array[i], verbose)
   end
 end
 
