@@ -1,4 +1,8 @@
 
+requires = {
+  "logs"
+}
+
 getPeripheral = nil
 -- Returns a wrapped peripheral of the name given
 -- Params:
@@ -6,6 +10,15 @@ getPeripheral = nil
 -- Returns:
 --  Wrapped peripheral if found
 --  otherwise nil (Error message printed)
+
+args = {...}
+
+main = function()
+  os.loadAPI("/libs/i")
+  i.importList(requires)
+  logs.add("Running libs/core", 5)
+  logs.addArray(args, "Arguments", 6)
+end
 
 printArray = nil
 -- Prints an array to the terminal window
@@ -27,3 +40,5 @@ printArray = function(array)
     print(str)
   end
 end
+
+main()

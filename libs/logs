@@ -44,6 +44,8 @@ log = {}
 main = function()
   os.loadAPI("libs/i")
   i.importList(requires)
+  logs.add("Running libs/logs", 5)
+  logs.addArray(args, "Arguments", 6)
 end
 
 setVerbose = function(verbose)
