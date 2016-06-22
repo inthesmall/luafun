@@ -1,0 +1,19 @@
+
+requires = {
+  "logs"
+}
+
+args = {...}
+
+main = function()
+  os.loadAPI("/libs/i")
+  i.importList(requires)
+  logs.add("Running [Program]", 5)
+  logs.addArray(args, "Arguments", 6)
+  
+  i.importList(args)
+  
+  logs.printLog()
+end
+
+main()
