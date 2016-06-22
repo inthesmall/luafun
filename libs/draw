@@ -114,9 +114,6 @@ args = {...}
 main = function()
   os.loadAPI("libs/i")
   i.importList(requires)
-  
-  logs.add("Running libs/draw", 5)
-  logs.addArray(args, "Arguments", 6)
 end
 
 setScreen = function(periph)

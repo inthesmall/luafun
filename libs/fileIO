@@ -23,9 +23,6 @@ writeFile = nil
 main = function()
   os.loadAPI("libs/i")
   i.importList(requires)
-  
-  logs.add("Running libs/fileIO", 5)
-  logs.addArray(args, "Arguments", 6)
 end
 
 readFile = function(filepath)
