@@ -9,6 +9,15 @@ setVerbose = nil
 -- Params:
 --  Positive int specifying the amount of logs to track (0 means see all)
 
+getVerbose = nil
+-- Gets the level of verbose-ness
+
+getLog = nil
+-- Gets the log
+
+getLogLength = nil
+-- Gets the length of the log
+
 clear = nil
 -- Clears the log of all entries
 
@@ -38,8 +47,8 @@ printLogToFile = nil
 -- I am not too sure what the standards for verbose levels are
 -- so im just gunna say 0 means print everything and above that
 -- is reduced visibillity
-verboseLevel = 0
-log = {}
+local verboseLevel = 0
+local log = {}
 
 main = function()
   os.loadAPI("libs/i")
@@ -52,6 +61,18 @@ setVerbose = function(verbose)
   else
     verboseLevel = 0
   end
+end
+
+getVerbose = function()
+  return verboseLevel
+end
+
+getLog = function()
+  return log
+end
+
+getLogLength = function()
+  return #log
 end
 
 clear = function()

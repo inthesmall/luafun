@@ -58,6 +58,18 @@ box = nil
 --  Colour of the box
 --  Opacity of the box
 
+frameBox = nil
+-- Draws a framed box to the screen
+-- Params:
+--  xPos of the top left corner
+--  yPos of the top left corner
+--  Width of the box
+--  Height of the box
+--  Colour of the box
+--  Opacity of the box
+--  Colour of the border
+--  Pixels wide of the border
+
 blockText = nil
 -- Framed text
 -- Params:
@@ -174,6 +186,16 @@ end
 box = function(xPos, yPos, width, height, colour, alpha)
   if (testOpen(true, "box")) then
     screen.addBox(xPos, yPos, width, height, colour, alpha)
+  end
+end
+
+frameBox = function(xPos, yPos, width, height, colour, alpha, colourBorder, widthBorder)
+  if (testOpen(true, "frameBox")) then
+    screen.addBox(xPos + widthBorder, yPos + widthBorder, width - 2 * widthBorder, height - 2 * widthBorder, colour, alpha)
+    screen.addBox(xPos, yPos, width - widthBorder, widthBorder, colourBorder, 1)
+    screen.addBox(xPos + width - widthBorder, yPos, widthBorder, height - widthBorder, colourBorder, 1)
+    screen.addBox(xPos + widthBorder, yPos + height - widthBorder, width - widthBorder, widthBorder, colourBorder, 1)
+    screen.addBox(xPos, yPos + widthBorder, widthBorder, height - widthBorder, colourBorder, 1)
   end
 end
 

@@ -1,0 +1,52 @@
+
+requires = {
+  "logs",
+  "core",
+  "draw"
+}
+
+args = {...}
+
+MAX_LINES = 35
+
+main = function()
+  os.loadAPI("/libs/i")
+  i.importList(requires)
+  logs.add("Running guiLog", 5)
+  logs.addArray(args, "Arguments", 6)
+  
+  
+  
+  run()
+end
+
+run = function()
+  local gui = core.getPeripheral("openperipheral_bridge")
+  if (not gui) then
+    logs.add("Cannot start guiLog, no bridge found")
+    return
+  end
+  
+  draw.setScreen(gui)
+  
+  while (true) do
+    draw.clear()
+    draw.frameBox(10, 80, 300, MAX_LINES * draw.CHAR_HEIGHT + 10, 0xFFFFFF, 0.3, 0x000000, 2)
+    
+    local length = logs.getLogLength()
+    if (length > 0) then
+      local log = logs.getLog()
+      local start = length - MAX_LINES + 1
+      if (start < 1) then
+        start = 1
+      end
+      for i = start, length do
+        draw.text(15, 85 + (i - start) * draw.CHAR_HEIGHT, log[i], 0x000000, "left")
+      end
+      draw.update()
+    end
+    sleep(0.2)
+  end
+end
+
+main()
